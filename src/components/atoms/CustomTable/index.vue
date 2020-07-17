@@ -119,6 +119,8 @@ export default {
         this.ascending = true;
       }
 
+
+      //  ---  Sort  ---
       const sorted = this.tableData.slice().sort((a, b) => {
         const A = a[items];
         const B = b[items];
@@ -156,6 +158,28 @@ export default {
             if (AinnerText < BinnerText) return 1;
           }
           return 0;
+        }
+
+        // sort String and Alphanumeric
+        if (typeof A === 'string' || typeof B === 'string') {
+          const letters = /[^a-zA-Z]/g;
+          const numbers = /[^0-9]/g;
+
+          const aA = A.replace(letters, '');
+          const bA = B.replace(letters, '');
+          if (aA === bA) {
+            const aN = parseInt(A.replace(numbers, ''), 10);
+            const bN = parseInt(B.replace(numbers, ''), 10);
+
+            if (this.ascending) {
+              if (aN > bN) return 1;
+              if (aN < bN) return -1;
+            } else {
+              if (aN > bN) return -1;
+              if (aN < bN) return 1;
+            }
+            return 0;
+          }
         }
 
         if (this.ascending) {
