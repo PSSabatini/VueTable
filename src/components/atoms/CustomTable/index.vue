@@ -112,6 +112,7 @@ export default {
     sort(items) {
       this.selectedColumn = items;
 
+      // Set the sort direction
       if (this.selectedColumn === this.changedColumn) {
         this.ascending = this.ascending ? !this.ascending : true;
       } else {
@@ -122,6 +123,41 @@ export default {
         const A = a[items];
         const B = b[items];
 
+        // sort Dates
+        if ((!Number.isNaN(Date.parse(A)) || !Number.isNaN(Date.parse(B)))
+          && (typeof A !== 'number' || typeof B !== 'number')) {
+          const dateA = Date.parse(A);
+          const dateB = Date.parse(B);
+          if (this.ascending) {
+            if (dateA > dateB) return 1;
+            if (dateA < dateB) return -1;
+          } else {
+            if (dateA > dateB) return -1;
+            if (dateA < dateB) return 1;
+          }
+          return 0;
+        }
+
+        // sort HTML
+        if (typeof A === 'string' && A.startsWith('&lt;') && A.includes('&lt;/')) {
+          const tagA = A.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+          const tagB = B.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+          const parser = new DOMParser();
+          const tagHTMLA = parser.parseFromString(tagA, 'text/html');
+          const tagHTMLB = parser.parseFromString(tagB, 'text/html');
+          const AinnerText = tagHTMLA.body.innerText;
+          const BinnerText = tagHTMLB.body.innerText;
+
+          if (this.ascending) {
+            if (AinnerText > BinnerText) return 1;
+            if (AinnerText < BinnerText) return -1;
+          } else {
+            if (AinnerText > BinnerText) return -1;
+            if (AinnerText < BinnerText) return 1;
+          }
+          return 0;
+        }
+
         if (this.ascending) {
           if (A > B) return 1;
           if (A < B) return -1;
@@ -131,6 +167,7 @@ export default {
         }
         return 0;
       });
+
       this.tableData = sorted;
       return sorted;
     },
