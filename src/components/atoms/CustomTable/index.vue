@@ -37,9 +37,24 @@
 export default {
   name: 'CustomTable',
 
+  data() {
+    return {
+      tableData: this.itemsTable,
+      ascending: '',
+      selectedColumn: '',
+      changedColumn: '',
+    };
+  },
+
   props: {
     itemsTable: {
       default: () => [],
+    },
+  },
+
+  watch: {
+    selectedColumn() {
+      this.changedColumn = this.selectedColumn;
     },
   },
 
@@ -47,7 +62,7 @@ export default {
     columns() {
       const cols = [];
 
-      this.itemsTable.forEach((item) => {
+      this.tableData.forEach((item) => {
         const keys = Object.keys(item);
 
         keys.forEach((key) => {
@@ -63,7 +78,7 @@ export default {
     sortedItems() {
       const item = [];
 
-      this.itemsTable.forEach((it) => {
+      this.tableData.forEach((it) => {
         if (Object.keys(it)) {
           const value = Object.values(it);
 
@@ -79,7 +94,7 @@ export default {
 
             // check for Array
             if (Array.isArray(val)) {
-              const arrToStr = val.join('<br>');
+              const arrToStr = val.sort().join('<br>');
 
               value[index] = arrToStr;
             }
@@ -88,8 +103,36 @@ export default {
           item.push(value);
         }
       });
-      console.log(item);
+
       return item;
+    },
+  },
+
+  methods: {
+    sort(items) {
+      this.selectedColumn = items;
+
+      if (this.selectedColumn === this.changedColumn) {
+        this.ascending = this.ascending ? !this.ascending : true;
+      } else {
+        this.ascending = true;
+      }
+
+      const sorted = this.tableData.slice().sort((a, b) => {
+        const A = a[items];
+        const B = b[items];
+
+        if (this.ascending) {
+          if (A > B) return 1;
+          if (A < B) return -1;
+        } else {
+          if (A > B) return -1;
+          if (A < B) return 1;
+        }
+        return 0;
+      });
+      this.tableData = sorted;
+      return sorted;
     },
   },
 };
@@ -97,5 +140,58 @@ export default {
 
 <style lang="scss">
   .custom-table {
+    font-family: Arial, Helvetica, sans-serif;
+
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+
+      width: 100%;
+      text-align: center;
+
+
+      th, td {
+        min-width: 60px;
+      }
+
+
+      th {
+        border: 2px solid black;
+        padding: 10px;
+
+        cursor: pointer;
+
+        transition: background-color 200ms ease;
+
+        &:hover {
+          background: linear-gradient(
+            90deg,rgba(14,14,14,1)
+            0%,rgba(10,16,18,0.5)
+            50%, rgba(15,15,22,1)
+            100%);
+        }
+      }
+
+
+      td {
+        border: 1px solid black;
+        padding: 5px;
+      }
+
+      a {
+        text-decoration: none;
+        color: black;
+
+        &:visited {
+          color: black;
+        }
+
+        &:hover {
+          font-weight: 700;
+          border-bottom: 2px solid black;
+        }
+      }
+    }
+
   }
 </style>
